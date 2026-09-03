@@ -19,16 +19,24 @@ jobs:
             "https://github.com"
           )
 
-                   FAILED=0
+          FAILED=0
 
           for url in "${WEBSITES[@]}"; do
             echo "Checking: $url"
             
-            # Use '|| true' to prevent curl connection errors from crashing the script execution
-            STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "$url" || echo "000")
+            # Fetch the status numeric value safely, defaulting to 0 if the website fails to connect
+            STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "$url" || echo 0)
             
-            # A status code of 000 means the server couldn't be reached at all (DNS down / connection timeout)
-            if [[ "$STATUS" == 50* ]] || [ "$STATUS" == "*000*" ]; then
+            # Clean up any unexpected whitespace or extra digits from curl output
+            STATUS=$(echo "$STATUS" | tr -d -c '0-9')
+            
+            # Fallback if the variable ends up entirely empty
+            if [ -z "$STATUS" ]; then STATUS=0; fi
+
+            echo "Extracted status code: $STATUS"
+
+            # Fail if status is 0 (connection error) OR 500 and above (server errors)
+            if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 500 ]; then
               echo "❌ FAILED ($STATUS)"
               FAILED=1
             else
@@ -37,7 +45,7 @@ jobs:
             echo "-----------------------------------"
           done
 
-          # The loop finishes everything before evaluating final completion rules
+          # Trigger step failure after checking every site on the list
           if [ $FAILED -ne 0 ]; then
             echo "One or more websites returned a 50x server error or connection failure!"
             exit 1
