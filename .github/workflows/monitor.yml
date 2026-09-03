@@ -1,0 +1,45 @@
+name: Check Multiple Websites HTTP Status
+
+on:
+  schedule:
+    # Runs every 30 minutes to stay safely within free quotas / limits
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check-websites:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test HTTP Status of All Sites
+        run: |
+          # Define your array of websites here
+          WEBSITES=(
+            "https://google.com"
+            "https://ggggg.com"
+          
+            # Add the rest of your 15 websites below
+          )
+          
+          FAILED=0
+          
+          echo "=== Starting HTTP Status Check ==="
+          for site in "${WEBSITES[@]}"; do
+            echo "Checking: $site"
+            # Fetch status code, timeout after 10 seconds, ignore SSL errors if needed (-k)
+            STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 10 "$site")
+            
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ SUCCESS: $site returned $STATUS"
+            else
+              echo "❌ FAILURE: $site returned $STATUS"
+              FAILED=$((FAILED + 1))
+            fi
+            echo "-----------------------------------"
+          done
+          
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Error: $FAILED website(s) failed the status check!"
+            exit 1
+          fi
+          
+          echo "All websites are healthy!"
