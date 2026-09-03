@@ -14,10 +14,16 @@ jobs:
         run: |
           WEBSITES=(
             "https://google.com"
-            "https://github.com"
-            "https://gfgggb.com"
-            "https://github.com"
-            "https://gfgggccb.com"
+            "https://alkahhal.com.sa"
+            "https://jumppeak.net"
+            "https://ramclinics.net"
+            "https://ramclinics.net"
+            "https://dohaclinics.sa"
+            "https://tallah-beauty.com"
+            "https://tallah-beauty.com"
+            "https://zaraclinics.com"
+            "https://sdcomplex.com"
+            "https://hca.med.sa"
           )
 
           FAILED=0
