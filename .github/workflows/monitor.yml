@@ -28,7 +28,7 @@ jobs:
             STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "$url" || echo "000")
             
             # A status code of 000 means the server couldn't be reached at all (DNS down / connection timeout)
-            if [[ "$STATUS" == 50* ]] || [ "$STATUS" == "000" ]; then
+            if [[ "$STATUS" == 50* ]] || [ "$STATUS" == "*000*" ]; then
               echo "❌ FAILED ($STATUS)"
               FAILED=1
             else
