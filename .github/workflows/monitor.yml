@@ -16,6 +16,7 @@ jobs:
             "https://google.com"
             "https://github.com"
             "https://gfgggb.com"
+            "https://github.com"
           )
 
           FAILED=0
@@ -49,6 +50,6 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "⚠️ ALERT: Website Status Check Failed"
-          to: akram.mohamed@raqmia.com
+          to: akram.mohamed@raqmia.net
           from: Website Monitor Bot
           body: "One or more of your 15 monitored websites failed the HTTP status check. Please check your GitHub Actions logs immediately."
