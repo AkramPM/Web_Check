@@ -21,32 +21,31 @@ jobs:
           )
 
           FAILED=0
+          FAILED_LIST=""
 
           for url in "${WEBSITES[@]}"; do
             echo "Checking: $url"
             
-            # Fetch the status numeric value safely, defaulting to 0 if the website fails to connect
             STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "$url" || echo 0)
-            
-            # Clean up any unexpected whitespace or extra digits from curl output
             STATUS=$(echo "$STATUS" | tr -d -c '0-9')
-            
-            # Fallback if the variable ends up entirely empty
             if [ -z "$STATUS" ]; then STATUS=0; fi
 
-            echo "Extracted status code: $STATUS"
-
-            # Fail if status is 0 (connection error) OR 500 and above (server errors)
             if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 500 ]; then
               echo "❌ FAILED ($STATUS)"
               FAILED=1
+              # Append the failed URL and its status code to our list
+              FAILED_LIST="$FAILED_LIST\\n- $url (Status: $STATUS)"
             else
               echo "✅ Pass ($STATUS)"
             fi
             echo "-----------------------------------"
           done
 
-          # Trigger step failure after checking every site on the list
+          # Save the list of broken websites to a GitHub environment file so the email step can read it
+          echo "FAILED_WEBSITES<<EOF" >> $GITHUB_ENV
+          echo -e "$FAILED_LIST" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
           if [ $FAILED -ne 0 ]; then
             echo "One or more websites returned a 50x server error or connection failure!"
             exit 1
@@ -64,4 +63,6 @@ jobs:
           subject: "⚠️ ALERT: Website Status Check Failed"
           to: akram.mohamed@raqmia.net
           from: Website Monitor Bot
-          body: "One or more of your 15 monitored websites failed the HTTP status check. Please check your GitHub Actions logs immediately."
+          body: |
+            The scheduled uptime check detected that the following website(s) are down or throwing errors:
+            ${{ env.FAILED_WEBSITES }}
