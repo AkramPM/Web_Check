@@ -3,7 +3,7 @@ name: Check Website Status
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/17 * * * *'
   workflow_dispatch:
 
 jobs:
